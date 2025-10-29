@@ -125,6 +125,12 @@ RUN if [ "$CUDA_VERSION" = "cu118" ]; then \
     fi
 ```
 
+**Note**: This approach is less reliable because:
+- sed commands are fragile and can break if pyproject.toml format changes
+- Does not handle the `[tool.uv.sources]` section completely
+- Risk of creating inconsistent configurations
+- Harder to test and validate
+
 ### Option 3: Runtime Installation
 
 Install GPU packages after the base installation:
@@ -149,12 +155,12 @@ RUN uv pip install cupy-cuda11x
 After implementing changes, test GPU support with:
 
 ```bash
-# Test PyTorch GPU
-docker run --gpus all ghcr.io/uk-lisa-gs/shared_code_environment:main-cuda12 \
+# Test PyTorch GPU (replace {BRANCH} with your branch name, e.g., 'main')
+docker run --gpus all ghcr.io/uk-lisa-gs/shared_code_environment:{BRANCH}-cuda12 \
     python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA devices: {torch.cuda.device_count()}')"
 
-# Test CuPy
-docker run --gpus all ghcr.io/uk-lisa-gs/shared_code_environment:main-cuda12 \
+# Test CuPy (replace {BRANCH} with your branch name, e.g., 'main')
+docker run --gpus all ghcr.io/uk-lisa-gs/shared_code_environment:{BRANCH}-cuda12 \
     python -c "import cupy as cp; print(f'CuPy device: {cp.cuda.Device()}'); print(cp.array([1, 2, 3]))"
 ```
 
