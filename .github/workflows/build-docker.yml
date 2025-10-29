@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Build Docker Images
 
 on:
   push:
@@ -17,6 +17,19 @@ jobs:
     permissions:
       contents: read
       packages: write
+    
+    strategy:
+      matrix:
+        variant:
+          - name: cpu
+            dockerfile: Dockerfile.cpu
+            suffix: cpu
+          - name: cuda11
+            dockerfile: Dockerfile.cuda11
+            suffix: cuda11
+          - name: cuda12
+            dockerfile: Dockerfile.cuda12
+            suffix: cuda12
     
     steps:
       - name: Checkout code
@@ -48,27 +61,30 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-,enable=${{ github.event_name != 'pull_request' }}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch,suffix=-${{ matrix.variant.suffix }}
+            type=ref,event=pr,suffix=-${{ matrix.variant.suffix }}
+            type=sha,prefix={{branch}}-,suffix=-${{ matrix.variant.suffix }},enable=${{ github.event_name != 'pull_request' }}
+            type=raw,value=latest-${{ matrix.variant.suffix }},enable={{is_default_branch}}
+          flavor: |
+            latest=false
       
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ${{ matrix.variant.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.variant.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.variant.name }}
           load: ${{ github.event_name == 'pull_request' }}
       
       - name: Test Docker image
         run: |
           if [ "${{ github.event_name }}" != "pull_request" ]; then
-            docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-            docker run --rm ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${{ matrix.variant.suffix }}
+            docker run --rm ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${{ matrix.variant.suffix }}
           else
             # For PRs, use the first tag from metadata output
             TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
