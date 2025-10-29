@@ -23,8 +23,19 @@ dependencies = [
     "jupyter",
     "nbconvert",
     "matplotlib",
+    "torch>=2.7.0",
 ]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel", "cython"]
 build-backend = "setuptools.build_meta"
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
