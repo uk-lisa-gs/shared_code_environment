@@ -36,16 +36,6 @@ COPY README.md ./
 # Verify uv is installed
 RUN uv --version
 
-# Install dependencies from pyproject.toml  
-# Set GIT_SSL_NO_VERIFY as a workaround for SSL certificate verification issues
-# Note: For GPU support, the following changes would be recommended:
-# 1. PyTorch: Change pyproject.toml to use CUDA 12.x wheel index
-#    [[tool.uv.index]]
-#    name = "pytorch-cu121"
-#    url = "https://download.pytorch.org/whl/cu121"
-# 2. gbgpu: Already GPU-capable, may need CUDA-specific compilation flags
-# 3. pycbc: Has GPU support via PyCUDA/cupy - would need cupy-cuda12x installed
-# 4. Other packages: Most numpy/scipy based packages will work with GPU via PyTorch/cupy
 ENV GIT_SSL_NO_VERIFY=1
 RUN uv pip install --system .
 ENV GIT_SSL_NO_VERIFY=
