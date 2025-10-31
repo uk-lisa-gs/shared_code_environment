@@ -6,7 +6,9 @@ FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 WORKDIR /app
 
 # Install Python 3.12 and other dependencies
-RUN apt-get update && \
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    export TZ=Etc/UTC && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
     software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
