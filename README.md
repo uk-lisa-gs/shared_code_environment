@@ -92,82 +92,12 @@ The Docker images are automatically built by GitHub Actions on:
 
 All three variants (CPU, CUDA 11, CUDA 12) are built in parallel for each trigger.
 
-## GPU Support
-
-### Current State
-The CUDA 11 and CUDA 12 images currently install the **CPU versions** of all dependencies. This allows the images to be built and tagged correctly while maintaining compatibility with the existing codebase.
-
-### Recommended Changes for Full GPU Support
-
-To enable full GPU acceleration, the following changes would be needed:
-
-#### 1. PyTorch (torch)
-Currently using CPU-only wheels. For GPU support:
-
-**CUDA 11.8:**
-```toml
-[[tool.uv.index]]
-name = "pytorch-cu118"
-url = "https://download.pytorch.org/whl/cu118"
-explicit = true
-
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cu118" },
-]
-```
-
-**CUDA 12.1:**
-```toml
-[[tool.uv.index]]
-name = "pytorch-cu121"
-url = "https://download.pytorch.org/whl/cu121"
-explicit = true
-
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cu121" },
-]
-```
-
-#### 2. PyCBC (pycbc)
-Has GPU support through PyCUDA/CuPy. Add to dependencies:
-- For CUDA 11: `cupy-cuda11x`
-- For CUDA 12: `cupy-cuda12x`
-
-#### 3. gbgpu
-Already GPU-capable. May benefit from CUDA-specific compilation flags set via environment variables during build.
-
-#### 4. Other Packages
-Most other packages (numpy, scipy, astropy, etc.) will automatically benefit from GPU acceleration when PyTorch and/or CuPy are properly configured, as they can delegate operations to GPU arrays.
-
-### Creating GPU-Specific Configurations
-
-To create separate GPU configurations, you would need:
-1. Separate `pyproject.toml` files (e.g., `pyproject.cuda11.toml`, `pyproject.cuda12.toml`)
-2. Modify Dockerfiles to copy and use the appropriate configuration
-3. Adjust the build to use `uv pip install` with the GPU-specific torch wheels
-
 ## Using uv for Package Management
 
 The Docker image includes [uv](https://github.com/astral-sh/uv), a fast Python package installer and resolver. To add dependencies:
 
-1. Add dependencies to `pyproject.toml`:
+1. Add dependencies to `pyproject.toml[.cuda'11|.cuda12]`:
    ```toml
    dependencies = ["requests", "numpy"]
    ```
-
-2. Update the Dockerfile to install dependencies:
-   ```dockerfile
-   RUN uv pip install --system .
-   ```
-
-## Development
-
-To extend this project with your own Python code:
-
-1. Add your Python code to a `src/` directory
-2. Update `pyproject.toml` with your dependencies
-3. Modify the Dockerfile to install your package
-4. Push changes to trigger the CI build
 
