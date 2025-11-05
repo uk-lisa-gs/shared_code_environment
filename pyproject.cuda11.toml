@@ -10,20 +10,21 @@ dependencies = [
     "astropy",
     "numpy",
     "scipy",
-    "bbhx",
-    "fastemriwaveforms",
+    "bbhx-cuda11x",
+    "fastemriwaveforms-cuda11x",
     "eryn",
     "lisaconstants",
+    # NOTE: fastlisaresponse needs to build from source to support GPU.
     "fastlisaresponse",
-    "gbgpu",
+    "gbgpu-cuda11x",
     "pycbc",
     "lisaglitch",
-    # NOTE: pyEFPE does not properly declare it needs cython. This can cause issues it's therefore not installed here, but is in the Dockerfile separately
     "pyEFPE @ git+https://github.com/gmorras/pyEFPE.git",
     "jupyter",
     "nbconvert",
     "matplotlib",
     "torch>=2.7.0",
+    "cupy-cuda11x",
 ]
 
 [build-system]
@@ -32,10 +33,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.uv.sources]
 torch = [
-    { index = "pytorch-cpu" },
+    { index = "pytorch-cu118" },
 ]
 
 [[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
 explicit = true
