@@ -11,6 +11,7 @@ dependencies = [
     "numpy",
     "scipy",
     "bbhx-cuda11x",
+    "lisaanalysistools-cuda11x",
     "fastemriwaveforms-cuda11x",
     "eryn",
     "lisaconstants",
